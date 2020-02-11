@@ -4,21 +4,26 @@ class User < ApplicationRecord
   ITERATIONS = 20_000
   DIGEST = OpenSSL::Digest::SHA256.new
 
-  has_many :questions
-  validates :email, :username, presence: true
-  validates :email, :username, uniqueness: true
-  validates :email, format: {with: URI::MailTo::EMAIL_REGEXP}
-  validates :username, length: {maximum: 40}
-  validates :username, format: {with: /\A\w*\z/,
-                                message: "only allows letters, numbers or _"}
-
   attr_accessor :password
 
-  validates :password, presence: true, on: :create
+  has_many :questions
 
-  validates_confirmation_of :password
+  validates :email, presence: true,
+            uniqueness: true,
+            format: {with: URI::MailTo::EMAIL_REGEXP}
+  validates :username, presence: true,
+            uniqueness: true,
+            length: {maximum: 40},
+            format: {with: /\A\w+\z/}
+  validates :password, presence: true, on: :create,
+                       confirmation: true
 
   before_save :encrypt_password
+  before_validation :to_down_case
+
+  def to_down_case
+    self.username.downcase! if self.username
+  end
 
   def encrypt_password
     if password.present?
