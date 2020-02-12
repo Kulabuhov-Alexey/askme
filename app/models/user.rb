@@ -43,10 +43,6 @@ class User < ApplicationRecord
     end
   end
 
-  def to_down_case
-    self.username&.downcase!
-  end
-
   def encrypt_password
     if password.present?
       # Создаем т.н. «соль» — случайная строка, усложняющая задачу хакерам по
@@ -67,5 +63,12 @@ class User < ApplicationRecord
 
       # Оба поля попадут в базу при сохранении (save).
     end
+  end
+
+  private
+
+  def to_down_case
+    self.username&.downcase!
+    self.email&.downcase!
   end
 end
