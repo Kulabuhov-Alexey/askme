@@ -3,7 +3,7 @@ require 'openssl'
 class User < ApplicationRecord
   ITERATIONS = 20_000
   DIGEST = OpenSSL::Digest::SHA256.new
-  USERNAMEFORMAT = /\A\w+\z/
+  USER_NAME_FORMAT = /\A\w+\z/
 
   attr_accessor :password
 
@@ -15,12 +15,12 @@ class User < ApplicationRecord
   validates :username, presence: true,
             uniqueness: true,
             length: {maximum: 40},
-            format: {with: USERNAMEFORMAT}
+            format: {with: USER_NAME_FORMAT}
   validates :password, presence: true, on: :create,
             confirmation: true
-
   before_save :encrypt_password
   before_validation :to_down_case
+  after_validation :validate_username
 
   # Служебный метод, преобразующий бинарную строку в шестнадцатиричный формат,
   # для удобства хранения.
@@ -70,5 +70,9 @@ class User < ApplicationRecord
   def to_down_case
     self.username&.downcase!
     self.email&.downcase!
+  end
+
+  def validate_username
+    User.where(username: self.username)? errors.add(self.username,"is invalid Username") : return
   end
 end
