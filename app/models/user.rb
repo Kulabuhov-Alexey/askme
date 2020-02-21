@@ -20,7 +20,6 @@ class User < ApplicationRecord
             confirmation: true
   before_save :encrypt_password
   before_validation :to_down_case
-  after_validation :validate_username
 
   # Служебный метод, преобразующий бинарную строку в шестнадцатиричный формат,
   # для удобства хранения.
@@ -72,7 +71,4 @@ class User < ApplicationRecord
     self.email&.downcase!
   end
 
-  def validate_username
-    User.where(username: self.username)? errors.add(self.username,"is invalid Username") : return
-  end
 end
